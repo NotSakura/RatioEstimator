@@ -2,6 +2,9 @@
 title: "Ratio Estimator"
 author: 
   - Shreya Sakura Noskor
+  - Zeyi Cai
+  - Mo (Molly) Zhou
+  - Bingxu Li
 thanks: "Code and data are available at: [https://github.com/NotSakura/RatioEstimator.git](https://github.com/NotSakura/RatioEstimator.git)."
 date: today
 date-format: long
@@ -37,17 +40,71 @@ We first go to the IPUMS american data website and then we click 'get data' [htt
 
 
 ```{r}
+#| include: false
+#| warning: false
+#| message: false
+library(dplyr)
 
-
+# Assume ipums_extract is your original dataset
+# Step 1: Filter for California (State Code 71)
 california_data <- ipums_extract %>% filter(stateicp == 71)
 
+# Step 2: Total number of respondents in California
 total_respondents_california <- nrow(california_data)
 
+# Step 3: Number of respondents with doctoral degrees in California
 doctoral_respondents_california <- california_data %>%
-  filter(educ == "Doctoral") %>%  # Adjust according to your actual column values
+  filter(educd == 116) %>%  # Ensure 116 corresponds to doctoral degrees
   nrow()
+
+# Step 4: Calculate the ratio for California
+ratio_california <- doctoral_respondents_california / total_respondents_california
+
+# Step 5: Estimate total respondents for each state using ipums_extract dataset
+estimated_data <- ipums_extract %>%
+  group_by(stateicp) %>%
+  summarize(
+    doctoral_respondents = sum(educd == 116, na.rm = TRUE),  # Count of doctoral respondents
+    actual_respondents = n()                                   # Total respondents
+  ) %>%
+  mutate(
+    estimated_total = (doctoral_respondents / ratio_california)   # Apply California's ratio
+  )
+
+
+
 ```
 
+# brief overview of the ratio estimators approach
+
+Refered to the textbook to follow the approch of finding the ratio estimators. we first filtered for the state of california. Then we counted how many actual respondants there were and how many of them have their doctorate. We then divide it to find the ratio and then we apply that to the number of doctorate person in each state. 
+
+
+# Ratio and Actual Number of Respondants
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+library(knitr)
+
+
+estimated_data |>
+  kable(
+    col.names = c("State ICP", "Doctoral Respondents", "Actual Respondents", "Estimated Total Respondents"),
+    format.args = list(big.mark = ","),
+    digits = 2
+  )
+```
+
+
+
+# Explanation for why they are different
+
+California is home to many  universities and research institutions, which may contribute to a higher number of doctoral degree holders relative to the population. This uniqueness can skew the ratio when applied to other states that do not share the same educational environment.
+
+Also the ratio estimator assumes that the relationship between doctoral respondents and total respondents in California is same for all other states. This may not be true as in some states there may not be as much universities or the proportion of regular students to doctorate students could be different. 
 
 \newpage
 
