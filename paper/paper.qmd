@@ -1,5 +1,5 @@
 ---
-title: "Ratio Estimator"
+title: "Estimating the tital number of respondants based on Doctorate to Total ratio in California"
 author: 
   - Shreya Sakura Noskor
   - Zeyi Cai
@@ -8,7 +8,7 @@ author:
 thanks: "Code and data are available at: [https://github.com/NotSakura/RatioEstimator.git](https://github.com/NotSakura/RatioEstimator.git)."
 date: today
 date-format: long
-abstract: "First sentence. Second sentence. Third sentence. Fourth sentence."
+abstract: "We estimate the total number of respondants to the survey based on an estimate, where we assume that all states have the same doctorate to total ratio. This is done by calculating the ratio for california and applying that to all states. We see in most cases that the estimate is lower than the actual number, which implies that the california has a higher number of people who hold doctorates. This is important as we want to analyse which state has the most number of doctorates."
 format: pdf
 number-sections: true
 bibliography: references.bib
@@ -32,8 +32,22 @@ library(haven)
 ipums_extract <- read_dta("../data/01-raw_data/usa_00001.dta")
 ```
 
+# Introduction
+In this analysis, we aim to estimate the total number of respondents based on ratio of doctorate-holding people in California applied to number of doctorate-holding persons in other U.S. states. We assume that all states have the same proportion of doctoral-degree holders relative to the total number of survey respondents as California. To do this, we first calculate the doctorate-to-total ratio for California and apply that ratio to each state in the dataset.Our estimand is the actual number of respondants of the survey carried out bu the U.S. government.
 
-# Instructions on Extracting Data
+However, our findings indicate that in most states, the estimated number of doctoral-degree holders is lower than the actual number. This suggests that California has a higher proportion of respondents with doctoral degrees compared to other states. This insight is critical for understanding the distribution of doctoral education across the country, as it highlights the relative education levels of states and can inform further analysis of which states are leading in the number of individuals with doctoral degrees. 
+
+Through this methodology, we aim to better understand the educational landscape across the U.S. and identify states with the highest concentrations of highly educated individuals, particularly those with doctoral qualifications. Our data  section (@sec-data) cites the dataset and the variables we used. Our result section outlines the actual estimated numbers we get. And lastly our Discussion section (@sec-disc) tells us about what the Result (@sec-res) section means. 
+
+
+# Data {#sec-data}
+
+The data used in the paper to investogate ratio estimators are collected from @ipums_usa. We used R [@citeR] to write the code and the data was cleaned using tidyverse [@thereferencecanbewhatever] and haven [@haven]
+
+## Measurement
+This data is collected by the US government in their census. The data is collected with surevy and such which is why it is a reliable data collection. It is of course no perfect as there could be missing data from the under-represented sample of the population but on average they are pretty accurate. The variables we explore is state (in order to filter by the state of California), educd (which tells us our education level).
+
+## Instructions on Extracting Data
 
 We first go to the IPUMS american data website and then we click 'get data' [https://usa.ipums.org/usa/](https://usa.ipums.org/usa/). Next we click SELECT SAMPLES then we deselect everything there. We then click ASC 2022 to get the 2022 data. Then we check which values we want so we go to Households and pick Geographic, where we select STATEICP. And we go to Person and click education where we click EDUC. Once we finished that we click view cart to see our dataset (click CREATE DATA EXTRACT). We change the data format to .dta and we change the sample size to 500 after we click CUSTOMISE SAMPLE SIZES. Then we give and an appropriate detail fo extract that includes today's date and what columns we are going to be looking at. Then we download it (after making an account) and add it to our repository to read. 
 
@@ -75,17 +89,20 @@ estimated_data <- ipums_extract %>%
 
 ```
 
-# brief overview of the ratio estimators approach
+## Brief Overview of The Ratio Estimators Approach
 
-Refered to the textbook to follow the approch of finding the ratio estimators. we first filtered for the state of california. Then we counted how many actual respondants there were and how many of them have their doctorate. We then divide it to find the ratio and then we apply that to the number of doctorate person in each state. 
+Referred to the textbook to follow the approach of finding the ratio estimators. we first filtered for the state of California. Then we counted how many actual respondents there were and how many of them have their doctorate. We then divide it to find the ratio and then we apply that to the number of doctorate person in each state. 
 
+# Results {#sec-res}
 
-# Ratio and Actual Number of Respondants
+## Ratio and Actual Number of Respondants
 
 ```{r}
 #| echo: false
 #| warning: false
 #| message: false
+#| label: tbl-1
+#| tbl-cap: "The estimated, and actual repondants of each state, represented by state ICP"
 
 library(knitr)
 
@@ -94,17 +111,19 @@ estimated_data |>
   kable(
     col.names = c("State ICP", "Doctoral Respondents", "Actual Respondents", "Estimated Total Respondents"),
     format.args = list(big.mark = ","),
-    digits = 2
+    digits = 0
   )
 ```
 
 
 
-# Explanation for why they are different
+# Discussion {#sec-disc}
 
 California is home to many  universities and research institutions, which may contribute to a higher number of doctoral degree holders relative to the population. This uniqueness can skew the ratio when applied to other states that do not share the same educational environment.
 
 Also the ratio estimator assumes that the relationship between doctoral respondents and total respondents in California is same for all other states. This may not be true as in some states there may not be as much universities or the proportion of regular students to doctorate students could be different. 
+
+Because of the above, in @tbl-1 we see that some states have a lower estimate than the actual number of respondents, which is due to the fact that their ratio between people holding doctorates vs. all people is lower than the ratio of California. 
 
 \newpage
 
